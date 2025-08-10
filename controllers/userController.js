@@ -1,6 +1,12 @@
 const User = require("./../models/userModel");
+const middleware = require("./../middlewares/userMiddleware");
+const validator = require("./../validators/userValidator");
 
 exports.createUser = async (req, res) => {
+  const isValid = validator.createCheck(req.body);
+  if (isValid !== true) {
+    res.status(400).json({ error: isValid });
+  }
   try {
     const { name, username, email, password, age = 17 } = req.body;
     const newUser = new User({
