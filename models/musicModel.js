@@ -10,15 +10,15 @@ const schema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    album: {
+      type: String,
+      required: true,
+    },
     duration: {
       type: Number,
       required: true,
     },
-    coverFileName: {
-      type: String,
-      required: true,
-    },
-    musicFileName: {
+    fileName: {
       type: String,
       required: true,
     },

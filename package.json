@@ -15,6 +15,8 @@
     "express": "^5.1.0",
     "fastest-validator": "^1.19.1",
     "mongoose": "^8.17.1",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "music-metadata": "^11.8.1"
   }
 }

@@ -1,3 +1,5 @@
+const multer = require("multer");
+const mm = require("music-metadata");
 const Music = require("./../models/musicModel");
 const middleware = require("./../middlewares/musicMiddleware");
 const path = require("path");
@@ -11,8 +13,7 @@ exports.getAllSongs = async (req, res) => {
         title: music.title,
         artist: music.artist,
         duration: music.duration,
-        coverUrl: `${process.env.HOST}public/uploads/images/${music.coverFileName}`,
-        musicUrl: `${process.env.HOST}download/music/${music.musicFileName}`,
+        musicUrl: `${process.env.HOST}download/music/${music.fileName}`,
       }))
     );
   } catch (err) {
@@ -33,11 +34,37 @@ exports.getMusicById = async (req, res) => {
       title: music.title,
       artist: music.artist,
       duration: music.duration,
-      coverUrl: `${process.env.HOST}public/uploads/images/${music.coverFileName}`,
-      musicUrl: `${process.env.HOST}download/music/${music.musicFileName}`,
+      musicUrl: `${process.env.HOST}download/music/${music.fileName}`,
     });
   } catch (err) {
     res.status(500).json({ err: err.message });
+  }
+};
+
+exports.uploadOne = async (req, res) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: "No File Recived!" });
+    }
+
+    const songData = await mm.parseFile(req.file.path);
+
+    const newMusic = new Music({
+      title: songData.common.title || path.parse(req.file.originalname).name,
+      artist: songData.common.artist || "unknown artist",
+      album: songData.common.album || "unknown album",
+      duration: songData.format.duration,
+      fileName: req.file.filename,
+    });
+
+    const result = await newMusic.save();
+
+    res.status(200).json({
+      message: "File Uploaded Successfully",
+      info: newMusic,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 

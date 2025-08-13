@@ -29,7 +29,7 @@ exports.createUser = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = User.find().lean();
+    const users = await User.find().lean();
     res.json(users);
   } catch (err) {
     res.status(400).json({ message: err.message });
