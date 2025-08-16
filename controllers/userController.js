@@ -1,7 +1,17 @@
+const bcrypt = require("bcryptjs");
 const User = require("./../models/userModel");
 const middleware = require("./../middlewares/userMiddleware");
 const validator = require("./../validators/userValidator");
-const bcrypt = require("bcryptjs");
+const tokenGen = require("./../utils/tokenGenerator");
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().lean();
+    res.json(users);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
 
 exports.createUser = async (req, res) => {
   const isValid = validator.createCheck(req.body);
@@ -18,7 +28,9 @@ exports.createUser = async (req, res) => {
       password: hashedPass,
       age: age,
     });
+
     const result = await newUser.save();
+
     res
       .status(201)
       .json({ message: "New User Created Successfully", result: result });
@@ -29,11 +41,29 @@ exports.createUser = async (req, res) => {
   }
 };
 
-exports.getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find().lean();
-    res.json(users);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+exports.logIn = async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email })
+    .lean()
+    .select("-__v -createdAt -updatedAt");
+
+  if (!user) {
+    res.status(404).json({ error: "No User With This Email Found!" });
+  }
+
+  const isValidPass = await bcrypt.compare(password, user.password);
+
+  if (!isValidPass) {
+    res.status(400).json({ message: "Wrong Password!" });
+  } else {
+    const tokens = tokenGen({
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+    });
+
+    delete user.password;
+    res.json({ message: "Logged in Successfully", tokens, user });
   }
 };
