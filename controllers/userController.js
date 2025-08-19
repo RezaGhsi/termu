@@ -7,7 +7,7 @@ const tokenGen = require("./../utils/tokenGenerator");
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find().lean();
-    res.json(users);
+    res.json(req.headers);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -42,28 +42,33 @@ exports.createUser = async (req, res) => {
 };
 
 exports.logIn = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email })
-    .lean()
-    .select("-__v -createdAt -updatedAt");
+    const user = await User.findOne({ email })
+      .lean()
+      .select("-__v -createdAt -updatedAt");
 
-  if (!user) {
-    res.status(404).json({ error: "No User With This Email Found!" });
-  }
+    if (!user) {
+      return res.status(404).json({ error: "Invalid Email or Password!" });
+    }
 
-  const isValidPass = await bcrypt.compare(password, user.password);
+    const isValidPass = await bcrypt.compare(password, user.password);
 
-  if (!isValidPass) {
-    res.status(400).json({ message: "Wrong Password!" });
-  } else {
-    const tokens = tokenGen({
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-    });
+    if (!isValidPass) {
+      return res.status(400).json({ message: "Invalid Email or Password!" });
+    } else {
+      const tokens = tokenGen({
+        _id: user._id,
+        email: user.email,
+        role: user.role,
+      });
 
-    delete user.password;
-    res.json({ message: "Logged in Successfully", tokens, user });
+      delete user.password;
+      res.json({ message: "Logged in Successfully", tokens, user });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

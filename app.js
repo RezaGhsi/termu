@@ -19,8 +19,8 @@ app.use(cors());
 app.use(morgan("dev"));
 
 app.use(
-  "public/uploads/musics",
-  express.static(path.join(__dirname, "public/uploads/musics"))
+  "uploads/musics",
+  express.static(path.join(__dirname, "uploads/musics"))
 );
 
 app.use("/download/music/", downloadRoutes);
@@ -34,6 +34,7 @@ app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     return res.status(err.status || 400).json({ error: err.message });
   }
+  console.error(err);
   return res
     .status(err.status || 500)
     .json({ error: err.message || "server error!" });

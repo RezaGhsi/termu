@@ -3,6 +3,7 @@ const mm = require("music-metadata");
 const Music = require("./../models/musicModel");
 const middleware = require("./../middlewares/musicMiddleware");
 const path = require("path");
+const fs = require("fs");
 
 exports.getAllSongs = async (req, res) => {
   try {
@@ -73,7 +74,7 @@ exports.downloadMusic = async (req, res) => {
     const filePath = path.join(
       __dirname,
       "..",
-      "public/uploads/musics",
+      "uploads/musics",
       req.params.fileName
     );
     res.setHeader("Content-type", "audio/mpeg");
