@@ -5,12 +5,11 @@ const path = require("path");
 const morgan = require("morgan");
 require("dotenv").config();
 
-const musicRoutes = require("./routes/musicRoutes");
-const userRoutes = require("./routes/userRoutes");
-const uploadRoutes = require("./routes/uploadRoutes");
-const downloadRoutes = require("./routes/downloadRoutes");
-
-const connectDB = require("./configs/db");
+const authRoutes = require("./routes/auth");
+const musicRoutes = require("./routes/music");
+const userRoutes = require("./routes/user");
+const uploadRoutes = require("./routes/upload");
+const downloadRoutes = require("./routes/download");
 
 const app = express();
 
@@ -23,6 +22,7 @@ app.use(
   express.static(path.join(__dirname, "uploads/musics"))
 );
 
+app.use("/auth", authRoutes);
 app.use("/download/music/", downloadRoutes);
 app.use("/music", musicRoutes);
 app.use("/user", userRoutes);
@@ -40,10 +40,4 @@ app.use((err, req, res, next) => {
     .json({ error: err.message || "server error!" });
 });
 
-const port = process.env.PORT || 3000;
-connectDB().then(() => {
-  app.listen(port, "0.0.0.0", (err) => {
-    if (err) throw err;
-    console.log(`Running On Port ${port}`);
-  });
-});
+module.exports = app;
