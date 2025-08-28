@@ -1,8 +1,9 @@
-const Router = require("express").Router();
+const router = require("express").Router();
 const controller = require("./../controllers/music");
-const uploader = require("../middlewares/multer");
+const authMiddleware = require("./../middlewares/auth");
+const isAdminMiddleware = require("./../middlewares/isAdmin");
 
-Router.get("/", controller.getAllSongs);
-Router.get("/:id", controller.getMusicById);
+router.get("/", authMiddleware, isAdminMiddleware, controller.getAllSongs);
+router.get("/:id", authMiddleware, isAdminMiddleware, controller.getMusicById);
 
-module.exports = Router;
+module.exports = router;

@@ -6,69 +6,9 @@ const tokenGen = require("../utils/tokenGenerator");
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().lean();
+    const users = await User.find().lean().select("-password");
     res.json(req.headers);
   } catch (err) {
     res.status(400).json({ message: err.message });
-  }
-};
-
-// exports.createUser = async (req, res) => {
-//   const isValid = validator.createCheck(req.body);
-//   if (isValid !== true) {
-//     res.status(400).json({ error: isValid });
-//   }
-//   const hashedPass = bcrypt.hashSync(req.body.password, 10);
-//   try {
-//     const { name, username, email, password, age = 17 } = req.body;
-//     const newUser = new User({
-//       name: name,
-//       username: username,
-//       email: email,
-//       password: hashedPass,
-//       age: age,
-//     });
-
-//     const result = await newUser.save();
-
-//     res
-//       .status(201)
-//       .json({ message: "New User Created Successfully", result: result });
-//   } catch (err) {
-//     res.status(400).json({
-//       error: "User Already Registered With this Email or Username",
-//     });
-//   }
-// };
-
-exports.logIn = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email })
-      .lean()
-      .select("-__v -createdAt -updatedAt");
-
-    if (!user) {
-      return res.status(404).json({ error: "Invalid Email or Password!" });
-    }
-
-    const isValidPass = await bcrypt.compare(password, user.password);
-
-    if (!isValidPass) {
-      return res.status(400).json({ message: "Invalid Email or Password!" });
-    } else {
-      const tokens = tokenGen({
-        _id: user._id,
-        email: user.email,
-        role: user.role,
-      });
-
-      delete user.password;
-      res.json({ message: "Logged in Successfully", tokens, user });
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 };
